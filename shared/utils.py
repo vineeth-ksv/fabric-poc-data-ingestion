@@ -3,6 +3,7 @@ from .constants import standard_values, sql_table_structures
 import random
 import re
 import string
+import datetime
 
 def generate_data(table_name, record_count):
 
@@ -45,17 +46,20 @@ def generate_data(table_name, record_count):
                     record[col] = fake.date(pattern="%Y-%m-%d")
 
                 elif col_props["datatype"] == "datetime":
-                    record[col] = fake.date_time().strftime('%Y-%m-%d %H:%M:%S.') + str(fake.random_int(min=0, max=999)).zfill(3)
+                    if col in ("md_insert_datetime", "md_update_datetime"):
+                        record[col] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        record[col] = fake.date_time().strftime('%Y-%m-%d %H:%M:%S.') + str(fake.random_int(min=0, max=999)).zfill(3)
 
                 elif col_props["datatype"] in ('decimal(13, 2)', 'decimal(20, 2)'):
                     if '_percentage' in col.lower() or 'percentage_' in col.lower() or '_percentage_' in col.lower():
-                        record[col] = fake.pydecimal(left_digits=(2, 3), right_digits=2, max_value=100.00, positive=True)
+                        record[col] = fake.pydecimal(left_digits=random.randint(2, 3), right_digits=2, max_value=100.00, positive=True)
                     elif '_weight' in col.lower() or 'weight_' in col.lower() or '_weight_' in col.lower():
-                        record[col] = fake.pydecimal(left_digits=(1, 4), right_digits=2, positive=True)
+                        record[col] = fake.pydecimal(left_digits=random.randint(1, 4), right_digits=2, positive=True)
                     elif '_number' in col.lower() or 'number_' in col.lower() or '_number_' in col.lower():
                         record[col] = round(fake.random_int(min=1000, max=10000000, step=1))
                     else:
-                        record[col] = fake.pydecimal(left_digits=(2,4), right_digits=2, positive=True)
+                        record[col] = fake.pydecimal(left_digits=random.randint(2,4), right_digits=2, positive=True)
 
                 elif col_props["datatype"] == "int":
                     record[col] = fake.random_int(min=1, max=2**31-1)
